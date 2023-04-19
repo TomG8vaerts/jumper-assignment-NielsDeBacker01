@@ -10,43 +10,71 @@ public class CubeAgent : Agent
 {
     public Rigidbody rb;
     public float jumpforce;
-    private float startDistance;
+    bool end = false;
+    bool isGrounded;
+    float reward = 0;
     public void Start()
     {
     }
     public override void OnEpisodeBegin()
-    {    
+    {
+        reward = .1f;
+        // reset de positie en orientatie als de agent gevallen is
+        if (this.transform.localPosition.y < -.5||this.transform.position.y>5)
+        {
+
+            this.transform.localPosition = new Vector3(0, 0.6f, 5.19f);
+        }
     }
     public override void CollectObservations(VectorSensor sensor)
     {
         sensor.AddObservation(transform.localPosition);
     }
-    public float speedMultiplier = 0.5f;
-    public float rotationMultiplier = 5;
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {    // Acties, size = 2    
         
-        Vector3 controlSignal = Vector3.zero;
 
-        controlSignal.z = actionBuffers.ContinuousActions[0];
-        transform.Translate(controlSignal * speedMultiplier);
-        transform.Rotate(0.0f, rotationMultiplier * actionBuffers.ContinuousActions[1], 0.0f);
-
-        // Beloningen
-        //cube vinden
-        if (transform.localPosition.y < -1){
-            Debug.Log(GetCumulativeReward());
-            EndEpisode();
+        int a;
+        
+        isGrounded = Physics.Raycast(transform.position, Vector3.down, 0.55f);
+        
+        //Debug.Log(isGrounded);
+        if (isGrounded)
+        {
+            a = actionBuffers.DiscreteActions[0];
+            if (a==1)
+            {
+                Jump();
+            }
         }
-        else {
-            SetReward(1f);
-            EndEpisode();
+
+        if (end)
+        {
+            print(reward);
+            if (reward>=1)
+            {
+                AddReward(1);
+                EndEpisode();
+            }
+            else
+            {
+                AddReward(reward);
+                EndEpisode();
+            }
+        }
+        else
+        {
+            reward += .2f;
         }
     }
 
     public void Jump()
     {
-        rb.AddForce(Vector3.up * jumpforce);
+        reward -= reward/4;
+        rb.GetComponent<Rigidbody>().AddForce(Vector3.up * jumpforce, ForceMode.Impulse);
     }
-    
+    public void End()
+    {
+        end = true;
+    }
 }

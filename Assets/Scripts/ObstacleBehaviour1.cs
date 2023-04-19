@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class ObstacleBehaviour1 : MonoBehaviour
 {
+    CubeAgent agent;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
+        agent = GameObject.Find("Agent").GetComponent<CubeAgent>();
     }
 
     public float speed;
@@ -18,6 +20,10 @@ public class ObstacleBehaviour1 : MonoBehaviour
 
     void OnTriggerEnter(Collider collision)
     {
+        if (collision.tag=="Agent")
+        {
+            agent.End();
+        }
         if (collision.tag == "Wall")
         {
              Destroy(this.gameObject);

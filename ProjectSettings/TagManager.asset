@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Obstacle
   - Wall
+  - Agent
   layers:
   - Default
   - TransparentFX
